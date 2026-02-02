@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Forest texture backgrounds - replaces emerald colors */
+  .bg-forest-texture {
+    background-image: url('/forest-texture.jpg');
+    background-size: cover;
+    background-position: center;
+  }
+  
+  .bg-forest-pattern {
+    background-image: url('/forest-texture.jpg');
+    background-size: 400px 400px;
+    background-repeat: repeat;
+  }
+  
+  /* Canopy light colors - replaces slate */
+  .bg-canopy-light {
+    background-color: #e8f2d8;
+  }
+  
+  .bg-canopy-glow {
+    background-color: #f5f9ed;
+  }
+  
+  .text-canopy {
+    color: #a8b88e;
+  }
+  
+  .border-canopy {
+    border-color: #d4dfc4;
+  }
+}

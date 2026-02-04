@@ -6,12 +6,15 @@ export default function Footer() {
 
   return (
     <>
-      <footer className="bg-black/95 border-t border-white/10 mt-16">
-        <div className="max-w-7xl mx-auto px-6 py-8">
+      <footer className="relative bg-cover bg-center border-t border-white/10 mt-16" style={{ backgroundImage: 'url(/nebula-bg.jpg)' }}>
+        {/* Dark overlay to make text readable */}
+        <div className="absolute inset-0 bg-black/85"></div>
+        
+        <div className="relative max-w-7xl mx-auto px-6 py-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
               <h3 className="text-sm font-semibold text-white uppercase tracking-wide mb-3">
-                midnight<span className="text-emerald-500">Laundry</span>
+                midnight<span className="text-forest-300">Laundry</span>
               </h3>
               <p className="text-sm text-gray-400">
                 briiite's creative universe
@@ -22,19 +25,19 @@ export default function Footer() {
               <h4 className="text-sm font-semibold text-white uppercase tracking-wide mb-3">
                 Links
               </h4>
-              <ul className="space-y-2 text-sm text-gray-400">
+              <ul className="space-y-2 text-sm">
                 <li>
-                  <a href="#" className="hover:text-emerald-500 transition-colors">
+                  <a href="#about" className="text-gray-400 hover:text-forest-300 transition-colors">
                     About
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-emerald-500 transition-colors">
+                  <a href="#music" className="text-gray-400 hover:text-forest-300 transition-colors">
                     Music
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="hover:text-emerald-500 transition-colors">
+                  <a href="#contact" className="text-gray-400 hover:text-forest-300 transition-colors">
                     Contact
                   </a>
                 </li>
@@ -49,7 +52,7 @@ export default function Footer() {
                 <li>
                   <button
                     onClick={() => setLegalModalSlug('public-license-notice')}
-                    className="text-gray-400 hover:text-emerald-500 transition-colors text-left"
+                    className="text-gray-400 hover:text-forest-300 transition-colors text-left"
                   >
                     Public License Notice
                   </button>
@@ -57,7 +60,7 @@ export default function Footer() {
                 <li>
                   <button
                     onClick={() => setLegalModalSlug('limited-creative-use-license')}
-                    className="text-gray-400 hover:text-emerald-500 transition-colors text-left"
+                    className="text-gray-400 hover:text-forest-300 transition-colors text-left"
                   >
                     Limited Creative Use License
                   </button>

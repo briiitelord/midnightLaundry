@@ -1,4 +1,4 @@
-import { Music, Video, FileText, BookOpen, Users, Info, Briefcase } from 'lucide-react';
+import { Music, Video, FileText, BookOpen, Users, Info, Briefcase, Mic } from 'lucide-react';
 import Navigation from '../components/Navigation';
 import MusicSection from '../components/sections/MusicSection';
 import VideoSection from '../components/sections/VideoSection';
@@ -7,6 +7,7 @@ import ResearchSection from '../components/sections/ResearchSection';
 import SocialFeed from '../components/sections/SocialFeed';
 import AboutSection from '../components/sections/AboutSection';
 import CommissionSection from '../components/sections/CommissionSection';
+import BriiiteBeSpittinPage from './BriiiteBeSpittinPage';
 import TalkToBriiiteWidget from '../components/widgets/TalkToBriiiteWidget';
 import GiftBucketWidget from '../components/widgets/GiftBucketWidget';
 import Footer from '../components/Footer';
@@ -24,6 +25,7 @@ export default function HomePage({ activeSection, onSectionChange }: HomePagePro
     { id: 'video' as Section, label: 'Video', icon: Video },
     { id: 'writing' as Section, label: 'Writing', icon: FileText },
     { id: 'research' as Section, label: 'Research', icon: BookOpen },
+    { id: 'briiite-be-spittin' as Section, label: 'briiite be spittin\'', icon: Mic },
     { id: 'social' as Section, label: 'briiite about town', icon: Users },
     { id: 'commission' as Section, label: 'Commission Work', icon: Briefcase },
   ];
@@ -40,6 +42,8 @@ export default function HomePage({ activeSection, onSectionChange }: HomePagePro
         return <WritingSection />;
       case 'research':
         return <ResearchSection />;
+      case 'briiite-be-spittin':
+        return <BriiiteBeSpittinPage />;
       case 'social':
         return <SocialFeed />;
       case 'commission':
@@ -50,14 +54,22 @@ export default function HomePage({ activeSection, onSectionChange }: HomePagePro
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100 relative overflow-hidden">
+    <div className="min-h-screen relative overflow-hidden bg-gray-50">
+      {/* Main laundry sketch background */}
       <div
-        className="absolute inset-0 opacity-5 pointer-events-none"
+        className="absolute inset-0 pointer-events-none"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-          backgroundSize: '30px 30px'
+          backgroundImage: 'url(/laundry-sketch.JPG)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed',
+          opacity: 0.85
         }}
       />
+      
+      {/* Light overlay for readability */}
+      <div className="absolute inset-0 bg-white/80 pointer-events-none" />
 
       <div className="relative z-10">
         <header className="bg-black/95 backdrop-blur-sm border-b border-white/10 shadow-xl">

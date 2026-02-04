@@ -20,10 +20,16 @@ export default function WritingSection() {
   useEffect(() => {
     // Check if returning from PayPal payment
     const params = new URLSearchParams(window.location.search);
-    if (params.get('paid') === 'true' && selectedPiece?.file_url) {
-      setAutoDownload(true);
+    const pieceId = params.get('piece_id');
+    if (params.get('paid') === 'true' && pieceId) {
+      // Find the piece that was paid for
+      const paidPiece = writings.find(w => w.id === pieceId);
+      if (paidPiece?.file_url) {
+        setSelectedPiece(paidPiece);
+        setAutoDownload(true);
+      }
     }
-  }, [selectedPiece]);
+  }, [writings]);
 
   useEffect(() => {
     // Trigger auto-download and hide modal
@@ -48,14 +54,27 @@ export default function WritingSection() {
   const buildPayPalLink = (amount: number) => {
     if (!paypalLink || !selectedPiece) return '';
     const base = paypalLink;
-    // Append ?paid=true to return URL for auto-download detection
-    const returnUrl = `${window.location.origin}${window.location.pathname}?paid=true`;
+    // Append ?paid=true&piece_id= to return URL for auto-download detection
+    const returnUrl = `${window.location.origin}${window.location.pathname}?paid=true&piece_id=${selectedPiece.id}`;
     return `${base}/${amount.toFixed(2)}`;
   };
 
   useEffect(() => {
     fetchWritings();
   }, [activeTab]);
+
+  useEffect(() => {
+    // Fetch all writings on mount to handle payment returns
+    const fetchAllWritings = async () => {
+      const { data } = await supabase
+        .from('writing_pieces')
+        .select('*');
+      if (data) {
+        setWritings(data);
+      }
+    };
+    fetchAllWritings();
+  }, []);
 
   const fetchWritings = async () => {
     setLoading(true);
@@ -92,8 +111,8 @@ export default function WritingSection() {
                 transition-all duration-200 border-2
                 ${
                   isActive
-                    ? 'bg-emerald-600 text-white border-emerald-700 shadow-lg'
-                    : 'bg-white text-gray-700 border-gray-200 hover:border-emerald-500'
+                    ? 'bg-forest bg-cover text-white border-forest-800 shadow-lg'
+                    : 'bg-white text-gray-700 border-gray-200 hover:border-forest-600 hover:text-forest-700'
                 }
               `}
             >
@@ -172,6 +191,17 @@ export default function WritingSection() {
                 </div>
               </div>
 
+              {/* Show PDF Preview if available */}
+              {selectedPiece.file_url && (
+                <div className="mb-8 border-2 border-gray-200 rounded-lg overflow-hidden">
+                  <iframe
+                    src={selectedPiece.file_url}
+                    className="w-full h-[600px]"
+                    title={`${selectedPiece.title} PDF Preview`}
+                  />
+                </div>
+              )}
+
               <div className="border-t border-gray-200 pt-6 flex gap-3">
                 {selectedPiece.price > 0 && paypalLink && (
                   <a
@@ -189,7 +219,7 @@ export default function WritingSection() {
                     ref={downloadRef}
                     href={selectedPiece.file_url}
                     download
-                    className="inline-block px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold"
+                    className="inline-block px-6 py-3 bg-forest bg-cover text-white rounded-lg border-2 border-forest-800 hover:opacity-90 transition-all font-semibold shadow-lg"
                   >
                     Download Full Version
                   </a>

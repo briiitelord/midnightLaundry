@@ -118,7 +118,7 @@ export default function TalkToBriiiteWidget() {
                   <button
                     type="submit"
                     disabled={submitting}
-                    className="w-full px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-all font-semibold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-6 py-3 bg-forest bg-cover text-white rounded-lg border-2 border-forest-800 hover:opacity-90 transition-all font-semibold flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                   >
                     {submitting ? (
                       <>

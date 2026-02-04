@@ -57,6 +57,20 @@ export async function uploadVideoFile(
 }
 
 /**
+ * Generic upload to any storage bucket
+ * Automatically generates unique filename with timestamp
+ */
+export async function uploadToStorage(
+  file: File,
+  bucket: string,
+  folder: string = ''
+): Promise<string | null> {
+  const fileName = `${Date.now()}-${file.name}`;
+  const path = folder ? `${folder}/${fileName}` : fileName;
+  return uploadFile(bucket, path, file);
+}
+
+/**
  * Delete file from Supabase Storage
  */
 export async function deleteFile(bucket: string, path: string): Promise<boolean> {

@@ -1,14 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import { Play, Pause, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { Database } from '../../types/database.types';
 
-type MediaItem = {
-  id: string;
-  title: string;
-  type: 'audio' | 'video';
-  url: string;
-  preview_url?: string | null;
-};
+type VideoItem = Database['public']['Tables']['videos']['Row'];
+type MusicItem = Database['public']['Tables']['music_items']['Row'];
+
+type MediaItem = 
+  | { type: 'audio'; item: MusicItem }
+  | { type: 'video'; item: VideoItem };
 
 export default function MediaCarousel() {
   const [mediaItems, setMediaItems] = useState<MediaItem[]>([]);
@@ -30,31 +30,25 @@ export default function MediaCarousel() {
       // Fetch music items
       const { data: musicData } = await supabase
         .from('music_items')
-        .select('id, title, file_url, preview_url')
+        .select('*')
         .not('file_url', 'is', null)
         .limit(11);
 
       // Fetch videos
       const { data: videoData } = await supabase
         .from('videos')
-        .select('id, title, video_url, preview_url')
-        .not('video_url', 'is', null)
+        .select('*')
+        .not('file_url', 'is', null)
         .limit(11);
 
       const music: MediaItem[] = (musicData || []).map(item => ({
-        id: item.id,
-        title: item.title,
         type: 'audio' as const,
-        url: item.file_url!,
-        preview_url: item.preview_url,
+        item: item
       }));
 
       const videos: MediaItem[] = (videoData || []).map(item => ({
-        id: item.id,
-        title: item.title,
         type: 'video' as const,
-        url: item.video_url!,
-        preview_url: item.preview_url,
+        item: item
       }));
 
       // Shuffle and combine
@@ -92,15 +86,32 @@ export default function MediaCarousel() {
   }, [currentIndex, currentItem]);
 
   useEffect(() => {
-    // Auto-play when item changes if we were playing
-    if (isPlaying && currentItem) {
-      playCurrentMedia();
+    // Stop playback when item changes and reset media elements
+    pauseCurrentMedia();
+    setIsPlaying(false);
+    setCurrentTime(0);
+    
+    // Load the new media
+    const mediaElement = currentItem?.type === 'audio' ? audioRef.current : videoRef.current;
+    if (mediaElement && mediaUrl) {
+      mediaElement.load();
+      
+      // Autoplay after a short delay to ensure media is loaded
+      const autoplayTimer = setTimeout(() => {
+        playCurrentMedia();
+      }, 100);
+      
+      return () => clearTimeout(autoplayTimer);
     }
   }, [currentIndex]);
 
   const playCurrentMedia = () => {
     const mediaElement = currentItem?.type === 'audio' ? audioRef.current : videoRef.current;
-    if (mediaElement) {
+    if (mediaElement && mediaUrl) {
+      // Ensure media is loaded before playing
+      if (mediaElement.readyState === 0) {
+        mediaElement.load();
+      }
       mediaElement.currentTime = 0;
       mediaElement.play().catch(err => console.error('Play failed:', err));
       setIsPlaying(true);
@@ -147,7 +158,14 @@ export default function MediaCarousel() {
 
   if (!currentItem) return null;
 
-  const mediaUrl = currentItem.preview_url || currentItem.url;
+  const mediaUrl = currentItem.type === 'audio' 
+    ? (currentItem.item.preview_url || currentItem.item.file_url)
+    : (currentItem.item.preview_url || currentItem.item.file_url);
+
+  // Debug log to check if URLs are present
+  if (!mediaUrl) {
+    console.warn('No media URL for item:', currentItem);
+  }
 
   return (
     <div className="bg-gradient-to-br from-canopy-100 to-canopy-50 rounded-xl p-6 border border-canopy-200 shadow-lg">
@@ -155,33 +173,63 @@ export default function MediaCarousel() {
         {/* Media Display */}
         <div className="relative bg-forest-950 rounded-lg overflow-hidden aspect-video flex items-center justify-center">
           {currentItem.type === 'audio' ? (
-            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-900 to-slate-900">
+            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-900 to-slate-900 relative">
+              {/* Artwork Background */}
+              {currentItem.item.artwork_url && (
+                <div className="absolute inset-0">
+                  <img 
+                    src={currentItem.item.artwork_url} 
+                    alt={currentItem.item.title} 
+                    className="w-full h-full object-cover opacity-30 blur-sm"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-900/70 to-slate-900/70"></div>
+                </div>
+              )}
               <audio
                 ref={audioRef}
-                src={mediaUrl}
+                src={mediaUrl || ''}
+                preload="metadata"
                 className="hidden"
                 crossOrigin="anonymous"
+                muted={isMuted}
               />
-              <div className="text-center space-y-4">
-                <div className="w-24 h-24 bg-emerald-600 rounded-full flex items-center justify-center mx-auto">
-                  <Play className="w-12 h-12 text-white" />
-                </div>
-                <p className="text-white text-lg font-semibold px-4">{currentItem.title}</p>
+              <div className="text-center space-y-4 relative z-10">
+                {/* Artwork */}
+                {currentItem.item.artwork_url ? (
+                  <div className="w-48 h-48 mx-auto rounded-lg overflow-hidden shadow-2xl ring-4 ring-emerald-500/30">
+                    <img 
+                      src={currentItem.item.artwork_url} 
+                      alt={currentItem.item.title} 
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-24 h-24 bg-emerald-600 rounded-full flex items-center justify-center mx-auto">
+                    {isPlaying ? (
+                      <Pause className="w-12 h-12 text-white" />
+                    ) : (
+                      <Play className="w-12 h-12 text-white ml-1" />
+                    )}
+                  </div>
+                )}
+                <p className="text-white text-lg font-semibold px-4">{currentItem.item.title}</p>
               </div>
             </div>
           ) : (
             <video
               ref={videoRef}
-              src={mediaUrl}
+              src={mediaUrl || ''}
+              preload="metadata"
               className="w-full h-full object-cover"
               crossOrigin="anonymous"
+              muted={isMuted}
             />
           )}
         </div>
 
         {/* Info */}
         <div className="px-2">
-          <h3 className="font-bold text-slate-900 truncate">{currentItem.title}</h3>
+          <h3 className="font-bold text-slate-900 truncate">{currentItem.item.title}</h3>
           <p className="text-xs text-slate-600 capitalize">{currentItem.type}</p>
         </div>
 

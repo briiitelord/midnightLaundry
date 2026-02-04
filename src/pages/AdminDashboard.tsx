@@ -1,16 +1,20 @@
 import { useState } from 'react';
-import { LogOut, Music, Video, FileText, BookOpen, MessageSquare, Gift, FileQuestion, Scale } from 'lucide-react';
+import { LogOut, Music, Video, FileText, BookOpen, MessageSquare, Gift, FileQuestion, Scale, PenTool, Settings, Share2, AlertTriangle } from 'lucide-react';
 import AdminMusicManager from '../components/admin/AdminMusicManager';
 import AdminVideoManager from '../components/admin/AdminVideoManager';
 import AdminWritingManager from '../components/admin/AdminWritingManager';
 import AdminResearchManager from '../components/admin/AdminResearchManager';
 import AdminSocialManager from '../components/admin/AdminSocialManager';
+import AdminSocialAccountsManager from '../components/admin/AdminSocialAccountsManager';
 import AdminInquiriesManager from '../components/admin/AdminInquiriesManager';
 import AdminMessagesManager from '../components/admin/AdminMessagesManager';
 import AdminGiftsManager from '../components/admin/AdminGiftsManager';
 import AdminLegalManager from '../components/admin/AdminLegalManager';
+import AdminScribbleManager from '../components/admin/AdminScribbleManager';
+import AdminSiteBuildManager from '../components/admin/AdminSiteBuildManager';
+import AdminSiteFailManager from '../components/admin/AdminSiteFailManager';
 
-export type AdminSection = 'music' | 'video' | 'writing' | 'research' | 'social' | 'inquiries' | 'messages' | 'gifts' | 'legal';
+export type AdminSection = 'music' | 'video' | 'writing' | 'research' | 'social' | 'socialaccounts' | 'inquiries' | 'messages' | 'gifts' | 'legal' | 'scribbles' | 'sitebuild' | 'sitefail';
 
 interface AdminDashboardProps {
   onLogout: () => void;
@@ -25,10 +29,14 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
     { id: 'writing' as AdminSection, label: 'Writing', icon: FileText },
     { id: 'research' as AdminSection, label: 'Research', icon: BookOpen },
     { id: 'social' as AdminSection, label: 'Social Posts', icon: MessageSquare },
+    { id: 'socialaccounts' as AdminSection, label: 'Social Accounts', icon: Share2 },
     { id: 'inquiries' as AdminSection, label: 'Commissions', icon: FileQuestion },
     { id: 'messages' as AdminSection, label: 'Messages', icon: MessageSquare },
     { id: 'gifts' as AdminSection, label: 'Gifts', icon: Gift },
     { id: 'legal' as AdminSection, label: 'Legal', icon: Scale },
+    { id: 'scribbles' as AdminSection, label: 'Scribbles', icon: PenTool },
+    { id: 'sitebuild' as AdminSection, label: 'Site Build', icon: Settings },
+    { id: 'sitefail' as AdminSection, label: 'Site Fail Logs', icon: AlertTriangle },
   ];
 
   const renderSection = () => {
@@ -43,6 +51,8 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         return <AdminResearchManager />;
       case 'social':
         return <AdminSocialManager />;
+      case 'socialaccounts':
+        return <AdminSocialAccountsManager />;
       case 'inquiries':
         return <AdminInquiriesManager />;
       case 'messages':
@@ -51,6 +61,12 @@ export default function AdminDashboard({ onLogout }: AdminDashboardProps) {
         return <AdminGiftsManager />;
       case 'legal':
         return <AdminLegalManager />;
+      case 'scribbles':
+        return <AdminScribbleManager />;
+      case 'sitebuild':
+        return <AdminSiteBuildManager />;
+      case 'sitefail':
+        return <AdminSiteFailManager />;
       default:
         return <AdminMusicManager />;
     }

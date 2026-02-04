@@ -241,22 +241,36 @@ export default function AdminVideoManager() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Embed URL</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Embed URL
+                    <span className="text-xs text-gray-400 ml-2">(for YouTube, Vimeo, etc.)</span>
+                  </label>
                   <input
                     type="url"
                     value={formData.embed_url || ''}
                     onChange={(e) => setFormData({ ...formData, embed_url: e.target.value })}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm"
+                    placeholder="https://www.youtube.com/embed/..."
                   />
+                  <p className="text-xs text-amber-400 mt-1">
+                    ⚠️ Autoplay will be automatically disabled
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">File URL</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    File URL
+                    <span className="text-xs text-gray-400 ml-2">(direct video file)</span>
+                  </label>
                   <input
                     type="url"
                     value={formData.file_url || ''}
                     onChange={(e) => setFormData({ ...formData, file_url: e.target.value })}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm"
+                    placeholder="https://...storage.../video.mp4"
                   />
+                  <p className="text-xs text-gray-400 mt-1">
+                    Direct link to MP4/video file
+                  </p>
                 </div>
               </div>
 
@@ -345,3 +359,7 @@ export default function AdminVideoManager() {
     </div>
   );
 }
+function setErrorMessage(arg0: string) {
+  throw new Error('Function not implemented.');
+}
+

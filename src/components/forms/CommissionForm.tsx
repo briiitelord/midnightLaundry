@@ -178,7 +178,7 @@ export default function CommissionForm() {
           disabled={submitting || !paymentComplete}
           className={`w-full px-6 py-4 text-white rounded-lg transition-all font-semibold text-lg flex items-center justify-center space-x-2 ${
             paymentComplete
-              ? 'bg-emerald-600 hover:bg-emerald-700'
+              ? 'bg-forest bg-cover border-2 border-forest-800 hover:opacity-90 shadow-lg'
               : 'bg-gray-400 cursor-not-allowed'
           } disabled:opacity-50 disabled:cursor-not-allowed`}
         >

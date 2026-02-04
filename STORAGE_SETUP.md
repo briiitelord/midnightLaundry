@@ -10,6 +10,7 @@ Your app uses the following buckets:
 - `videos` — Video files (MP4, WebM, etc.) organized by rating (sfw/nsfw)
 - `writings` — PDF documents and text files
 - `research` — Research PDF files
+- `scribbles` — Daily scribble PDFs for chalkboard widget
 - (Optional) `images` — Cover art and thumbnails
 
 ## Setup Instructions

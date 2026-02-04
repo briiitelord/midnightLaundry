@@ -22,6 +22,9 @@ export default function AdminMusicManager() {
     category: 'new_release',
     price: 0,
     is_exclusive: false,
+    source_type: 'direct_upload',
+    embed_full_track: false,
+    artwork_url: null,
   });
 
   useEffect(() => {
@@ -202,6 +205,9 @@ export default function AdminMusicManager() {
       price: item.price,
       is_exclusive: item.is_exclusive,
       slug: item.slug,
+      source_type: item.source_type || 'direct_upload',
+      united_masters_link: item.united_masters_link,
+      artwork_url: item.artwork_url || null,
     });
     setShowForm(true);
   };
@@ -260,6 +266,9 @@ export default function AdminMusicManager() {
               category: 'new_release',
               price: 0,
               is_exclusive: false,
+              source_type: 'direct_upload',
+              embed_full_track: false,
+              artwork_url: null,
             });
             setShowForm(true);
           }}
@@ -328,6 +337,102 @@ export default function AdminMusicManager() {
                 </div>
               </div>
 
+              {/* United Masters Section - Only for New Release */}
+              {formData.category === 'new_release' && (
+                <div className="bg-purple-900/20 border border-purple-700 rounded-lg p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <h4 className="font-semibold text-purple-300">United Masters Integration</h4>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Source Type</label>
+                    <select
+                      value={formData.source_type || 'direct_upload'}
+                      onChange={(e) => setFormData({ ...formData, source_type: e.target.value as any })}
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-500"
+                    >
+                      <option value="direct_upload">Direct Upload</option>
+                      <option value="united_masters">United Masters</option>
+                    </select>
+                  </div>
+
+                  {formData.source_type === 'united_masters' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                        United Masters Master Link
+                        <span className="text-red-400 ml-1">*</span>
+                      </label>
+                      <input
+                        type="url"
+                        required={formData.source_type === 'united_masters'}
+                        value={formData.united_masters_link || ''}
+                        onChange={(e) => setFormData({ ...formData, united_masters_link: e.target.value })}
+                        placeholder="https://unitedmasters.com/..."
+                        className="w-full px-3 py-2 bg-gray-700 border border-purple-600 rounded-lg text-white focus:outline-none focus:border-purple-500"
+                      />
+                      <p className="text-xs text-gray-400 mt-1">
+                        Paste the master link provided by United Masters for this release
+                      </p>
+                    </div>
+                  )}
+
+                  {formData.source_type === 'direct_upload' && (
+                    <p className="text-xs text-gray-400">
+                      Direct upload mode: Use File URL and Embed URL fields below
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* United Masters Section - Only for New Release */}
+              {formData.category === 'new_release' && (
+                <div className="bg-purple-900/20 border border-purple-700 rounded-lg p-4 space-y-3">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                    <h4 className="font-semibold text-purple-300">United Masters Integration</h4>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Source Type</label>
+                    <select
+                      value={formData.source_type || 'direct_upload'}
+                      onChange={(e) => setFormData({ ...formData, source_type: e.target.value as any })}
+                      className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-purple-500"
+                    >
+                      <option value="direct_upload">Direct Upload</option>
+                      <option value="united_masters">United Masters</option>
+                    </select>
+                  </div>
+
+                  {formData.source_type === 'united_masters' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                        United Masters Master Link
+                        <span className="text-red-400 ml-1">*</span>
+                      </label>
+                      <input
+                        type="url"
+                        required={formData.source_type === 'united_masters'}
+                        value={formData.united_masters_link || ''}
+                        onChange={(e) => setFormData({ ...formData, united_masters_link: e.target.value })}
+                        placeholder="https://unitedmasters.com/..."
+                        className="w-full px-3 py-2 bg-gray-700 border border-purple-600 rounded-lg text-white focus:outline-none focus:border-purple-500"
+                      />
+                      <p className="text-xs text-gray-400 mt-1">
+                        Paste the master link provided by United Masters for this release
+                      </p>
+                    </div>
+                  )}
+
+                  {formData.source_type === 'direct_upload' && (
+                    <p className="text-xs text-gray-400">
+                      Direct upload mode: Use File URL and Embed URL fields below
+                    </p>
+                  )}
+                </div>
+              )}
+
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">Description</label>
                 <textarea
@@ -339,22 +444,88 @@ export default function AdminMusicManager() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">File URL</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    File URL
+                    <span className="text-xs text-gray-400 ml-2">(direct audio file)</span>
+                  </label>
                   <input
                     type="url"
                     value={formData.file_url || ''}
                     onChange={(e) => setFormData({ ...formData, file_url: e.target.value })}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm"
+                    placeholder="https://...storage.../track.mp3"
                   />
+                  <p className="text-xs text-gray-400 mt-1">
+                    Direct link to MP3/audio file (Supabase Storage, etc.)
+                  </p>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-1">Embed URL</label>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Embed URL
+                    <span className="text-xs text-gray-400 ml-2">(optional - for SoundCloud, Spotify, etc.)</span>
+                  </label>
                   <input
                     type="url"
                     value={formData.embed_url || ''}
                     onChange={(e) => setFormData({ ...formData, embed_url: e.target.value })}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm"
+                    placeholder="https://w.soundcloud.com/player/..."
                   />
+                  <p className="text-xs text-amber-400 mt-1">
+                    ⚠️ Autoplay will be automatically disabled for all embeds
+                  </p>
+                </div>
+              </div>
+
+              {/* Artwork/Cover Image */}
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">
+                  Artwork URL
+                  <span className="text-xs text-gray-400 ml-2">(album/cover art for media players)</span>
+                </label>
+                <input
+                  type="url"
+                  value={formData.artwork_url || ''}
+                  onChange={(e) => setFormData({ ...formData, artwork_url: e.target.value || null })}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-emerald-500 text-sm"
+                  placeholder="https://...storage.../artwork.jpg"
+                />
+                <p className="text-xs text-gray-400 mt-1">
+                  Direct link to album artwork image (JPG/PNG). Recommended: 500x500px or larger
+                </p>
+              </div>
+
+              {/* Embed Preview Option */}
+              <div className="bg-blue-900/20 border border-blue-700 rounded-lg p-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1">
+                    <h4 className="font-semibold text-blue-300 mb-1">Embed Preview Mode</h4>
+                    <p className="text-xs text-gray-400">
+                      Choose whether to embed the full track or just a 22-second preview for users
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="embedMode"
+                        checked={formData.embed_full_track === false}
+                        onChange={() => setFormData({ ...formData, embed_full_track: false })}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm text-gray-300">22s Preview</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="radio"
+                        name="embedMode"
+                        checked={formData.embed_full_track === true}
+                        onChange={() => setFormData({ ...formData, embed_full_track: true })}
+                        className="w-4 h-4"
+                      />
+                      <span className="text-sm text-gray-300">Full Track</span>
+                    </label>
+                  </div>
                 </div>
               </div>
 

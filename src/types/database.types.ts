@@ -21,12 +21,15 @@ export interface Database {
           file_url: string | null
           price: number
           is_exclusive: boolean
+          embed_full_track: boolean
           preview_url: string | null
           preview_status: string | null
           legal_docs: string[]
           producer_credit: string
           view_count: number
           slug: string | null
+          source_type: 'direct_upload' | 'united_masters'
+          united_masters_link: string | null
           deleted_at: string | null
           created_at: string
           updated_at: string
@@ -40,12 +43,15 @@ export interface Database {
           file_url?: string | null
           price?: number
           is_exclusive?: boolean
+          embed_full_track?: boolean
           preview_url?: string | null
           preview_status?: string | null
           legal_docs?: string[]
           producer_credit?: string
           view_count?: number
           slug?: string | null
+          source_type?: 'direct_upload' | 'united_masters'
+          united_masters_link?: string | null
           deleted_at?: string | null
           created_at?: string
           updated_at?: string
@@ -59,12 +65,15 @@ export interface Database {
           file_url?: string | null
           price?: number
           is_exclusive?: boolean
+          embed_full_track?: boolean
           preview_url?: string | null
           preview_status?: string | null
           legal_docs?: string[]
           producer_credit?: string
           view_count?: number
           slug?: string | null
+          source_type?: 'direct_upload' | 'united_masters'
+          united_masters_link?: string | null
           deleted_at?: string | null
           created_at?: string
           updated_at?: string
@@ -412,6 +421,135 @@ export interface Database {
           deleted_at?: string | null
           created_at?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      scribbles: {
+        Row: {
+          id: string
+          title: string
+          description: string | null
+          pdf_url: string
+          is_active: boolean
+          display_date: string
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          title: string
+          description?: string | null
+          pdf_url: string
+          is_active?: boolean
+          display_date?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          title?: string
+          description?: string | null
+          pdf_url?: string
+          is_active?: boolean
+          display_date?: string
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      site_settings: {
+        Row: {
+          id: string
+          setting_key: string
+          setting_value: string
+          description: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          setting_key: string
+          setting_value: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          setting_key?: string
+          setting_value?: string
+          description?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      social_accounts: {
+        Row: {
+          id: string
+          platform: 'twitter' | 'instagram' | 'tiktok' | 'youtube' | 'linkedin' | 'facebook'
+          account_name: string
+          account_url: string
+          is_active: boolean
+          auto_sync: boolean
+          sync_frequency_minutes: number
+          last_synced_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          platform: 'twitter' | 'instagram' | 'tiktok' | 'youtube' | 'linkedin' | 'facebook'
+          account_name: string
+          account_url: string
+          is_active?: boolean
+          auto_sync?: boolean
+          sync_frequency_minutes?: number
+          last_synced_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          platform?: 'twitter' | 'instagram' | 'tiktok' | 'youtube' | 'linkedin' | 'facebook'
+          account_name?: string
+          account_url?: string
+          is_active?: boolean
+          auto_sync?: boolean
+          sync_frequency_minutes?: number
+          last_synced_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      error_logs: {
+        Row: {
+          id: string
+          error_message: string
+          error_type: string | null
+          error_stack: string | null
+          page_url: string | null
+          user_agent: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          error_message: string
+          error_type?: string | null
+          error_stack?: string | null
+          page_url?: string | null
+          user_agent?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          error_message?: string
+          error_type?: string | null
+          error_stack?: string | null
+          page_url?: string | null
+          user_agent?: string | null
+          created_at?: string
         }
         Relationships: []
       }

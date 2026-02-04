@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Video, Eye, EyeOff, AlertTriangle } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import type { Database } from '../../types/database.types';
+import { FEATURE_FLAGS } from '../../config/featureFlags';
+import VideoPlayer from '../widgets/VideoPlayer';
 
 type VideoItem = Database['public']['Tables']['videos']['Row'];
 
@@ -51,33 +53,6 @@ export default function VideoSection() {
 
   const handleFinalConfirmation = (confirmed: boolean) => {
     if (confirmed) {
-      // Play bacon sizzling sound effect for 2.2 seconds
-      const sizzle = new Audio('https://cdn.freesound.org/previews/321/321903_5260872-lq.mp3');
-      sizzle.volume = 0.5;
-      
-      // Add event listener to ensure it plays
-      sizzle.addEventListener('canplaythrough', () => {
-        sizzle.play().catch(err => {
-          console.log('Audio play failed:', err);
-          // Try alternative sound if first fails
-          const backup = new Audio('https://www.soundjay.com/misc/sounds/sizzle-1.mp3');
-          backup.volume = 0.5;
-          backup.play().catch(e => console.log('Backup audio failed:', e));
-          setTimeout(() => {
-            backup.pause();
-            backup.currentTime = 0;
-          }, 2200);
-        });
-      }, { once: true });
-      
-      sizzle.load();
-      
-      // Stop audio after 2.2 seconds
-      setTimeout(() => {
-        sizzle.pause();
-        sizzle.currentTime = 0;
-      }, 2200);
-      
       setAgeVerified(true);
       setShowSecondConfirmation(false);
       setActiveTab('nsfw');
@@ -97,8 +72,8 @@ export default function VideoSection() {
             transition-all duration-200 border-2
             ${
               activeTab === 'sfw'
-                ? 'bg-emerald-600 text-white border-emerald-700 shadow-lg'
-                : 'bg-white text-gray-700 border-gray-200 hover:border-emerald-500'
+                ? 'bg-forest bg-cover text-white border-forest-800 shadow-lg'
+                : 'bg-white text-gray-700 border-gray-200 hover:border-forest-600 hover:text-forest-700'
             }
           `}
         >
@@ -201,7 +176,7 @@ export default function VideoSection() {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {videos.map((video) => (
+              {(activeTab === 'sfw' ? videos.slice(0, 3) : videos).map((video) => (
                 <div
                   key={video.id}
                   className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 group"
@@ -212,6 +187,83 @@ export default function VideoSection() {
                         ? (video.preview_blurred_url || video.preview_url)
                         : video.preview_url;
 
+                      // Helper function to check if URL is an actual embed player (not a direct file)
+                      const isEmbedPlayer = (url: string) => {
+                        const lowerUrl = url.toLowerCase();
+                        return (
+                          lowerUrl.includes('youtube.com/embed') ||
+                          lowerUrl.includes('vimeo.com/video') ||
+                          lowerUrl.includes('dailymotion.com/embed') ||
+                          lowerUrl.includes('player.vimeo.com')
+                        );
+                      };
+
+                      // Determine video source: prefer embed_url if it's a real player, otherwise use file_url
+                      const videoSource = video.file_url;
+                      const hasRealEmbed = video.embed_url && isEmbedPlayer(video.embed_url);
+
+                      // Show embed player ONLY if embed_url is a real embed player
+                      if (hasRealEmbed) {
+                        let embedUrl = video.embed_url!;
+                        
+                        // Remove any existing autoplay parameters first
+                        embedUrl = embedUrl.replace(/[?&]autoplay=1/gi, '');
+                        embedUrl = embedUrl.replace(/[?&]auto_play=true/gi, '');
+                        embedUrl = embedUrl.replace(/[?&]loop=1/gi, '');
+                        
+                        const separator = embedUrl.includes('?') ? '&' : '?';
+                        
+                        // Add comprehensive autoplay prevention
+                        embedUrl = `${embedUrl}${separator}autoplay=0&auto_play=false&muted=0&loop=0`;
+                        
+                        return (
+                          <div className="mb-4 aspect-video">
+                            <iframe
+                              src={embedUrl}
+                              className="w-full h-full rounded-lg"
+                              allow="encrypted-media; fullscreen"
+                              loading="lazy"
+                              sandbox="allow-scripts allow-same-origin allow-presentation"
+                            />
+                          </div>
+                        );
+                      }
+
+                      // Use HTML5 video player for direct video files
+                      if (videoSource) {
+                        // Feature flag: Use dedicated VideoPlayer component or fallback to basic HTML5 video
+                        if (FEATURE_FLAGS.USE_VIDEO_PLAYER_COMPONENT) {
+                          return (
+                            <div className="mb-4">
+                              <VideoPlayer
+                                src={videoSource}
+                                title={video.title}
+                                poster={previewUrl || undefined}
+                              />
+                            </div>
+                          );
+                        } else {
+                          // Fallback: Basic HTML5 video element
+                          return (
+                            <div className="mb-4 aspect-video bg-gray-100 rounded-lg overflow-hidden">
+                              <video
+                                src={videoSource}
+                                controls
+                                poster={previewUrl || undefined}
+                                preload="none"
+                                controlsList="nodownload"
+                                disablePictureInPicture
+                                className="w-full h-full object-cover"
+                                crossOrigin="anonymous"
+                              >
+                                Your browser does not support the video tag.
+                              </video>
+                            </div>
+                          );
+                        }
+                      }
+
+                      // If no video source, show preview image as fallback
                       if (previewUrl) {
                         return (
                           <div className="mb-4 aspect-video bg-gray-100 rounded-lg overflow-hidden">
@@ -220,18 +272,6 @@ export default function VideoSection() {
                               alt={`${video.title} preview`}
                               className="w-full h-full object-cover"
                               loading="lazy"
-                            />
-                          </div>
-                        );
-                      }
-
-                      if (video.embed_url) {
-                        return (
-                          <div className="mb-4 aspect-video">
-                            <iframe
-                              src={video.embed_url}
-                              className="w-full h-full rounded-lg"
-                              allow="autoplay; fullscreen"
                             />
                           </div>
                         );

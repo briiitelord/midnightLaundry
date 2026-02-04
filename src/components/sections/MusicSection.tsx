@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Music, Disc3, ShoppingCart, Mic, Mail } from 'lucide-react';
+import { Music, Disc3, ShoppingCart, Mail } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { PAYPAL_ME_BASE_URL } from '../../config/paymentConfig';
 import CommissionForm from '../forms/CommissionForm';
 import MediaPlayer from '../widgets/MediaPlayer';
 import PurchaseModal from '../widgets/PurchaseModal';
 import LegalDocumentView from '../LegalDocumentView';
+import { FEATURE_FLAGS } from '../../config/featureFlags';
 
 type MusicFile = {
   preview_url: string | null;
@@ -18,10 +18,13 @@ type MusicFile = {
   embed_url: string | null;
   price: number;
   is_exclusive: boolean;
+  embed_full_track: boolean;
   legal_docs: string[];
   producer_credit: string;
   view_count: number;
   created_at: string;
+  source_type: 'direct_upload' | 'united_masters' | null;
+  united_masters_link: string | null;
 };
 type MusicCategory = 'new_release' | 'mix' | 'beat_for_sale' | 'podcast_clip' | 'exclusive_release';
 
@@ -31,12 +34,6 @@ export default function MusicSection() {
   const [loading, setLoading] = useState(true);
   const [purchaseModal, setPurchaseModal] = useState<MusicFile | null>(null);
   const [legalModalSlug, setLegalModalSlug] = useState<string | null>(null);
-
-  const buildPayPalLink = (amount: number) => {
-    if (!PAYPAL_ME_BASE_URL) return '';
-    const base = PAYPAL_ME_BASE_URL.replace(/\/+$/, '');
-    return `${base}/${amount.toFixed(2)}`;
-  };
 
   useEffect(() => {
     fetchMusicItems();
@@ -65,7 +62,6 @@ export default function MusicSection() {
     { id: 'new_release' as const, label: 'New Release', icon: Music },
     { id: 'mix' as const, label: 'Mixes', icon: Disc3 },
     { id: 'beat_for_sale' as const, label: 'Beats 4 Sale', icon: ShoppingCart },
-    { id: 'podcast_clip' as const, label: 'briiite be spittin\'', icon: Mic },
     { id: 'commission' as const, label: 'Commission Work', icon: Mail },
   ];
 
@@ -102,6 +98,25 @@ export default function MusicSection() {
         </div>
       ) : (
         <div className="space-y-4">
+          {/* SoundCloud Playlist Embed for Mixes tab */}
+          {activeTab === 'mix' && (
+            <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
+              <h3 className="text-xl font-bold text-gray-900 mb-4">midnightLaundry Mixes</h3>
+              <iframe 
+                width="100%" 
+                height="450" 
+                scrolling="no" 
+                frameBorder="no" 
+                allow="encrypted-media" 
+                src="https://w.soundcloud.com/player/?url=https%3A//api.soundcloud.com/playlists/soundcloud%253Aplaylists%253A2186055977&color=%23287530&auto_play=false&hide_related=false&show_comments=true&show_user=true&show_reposts=false&show_teaser=true&visual=true"
+                loading="lazy"
+                sandbox="allow-scripts allow-same-origin allow-presentation"
+              />
+              <div style={{fontSize: '10px', color: '#cccccc', lineBreak: 'anywhere', wordBreak: 'normal', overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis', fontFamily: 'Interstate,Lucida Grande,Lucida Sans Unicode,Lucida Sans,Garuda,Verdana,Tahoma,sans-serif', fontWeight: 100}}>
+                <a href="https://soundcloud.com/likeprayer" title="briiite." target="_blank" rel="noopener noreferrer" style={{color: '#cccccc', textDecoration: 'none'}}>briiite.</a> · <a href="https://soundcloud.com/likeprayer/sets/midnightlaundry-mixes" title="midnightLaundry Mixes" target="_blank" rel="noopener noreferrer" style={{color: '#cccccc', textDecoration: 'none'}}>midnightLaundry Mixes</a>
+              </div>
+            </div>
+          )}
           {loading ? (
             <div className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-600 border-t-transparent"></div>
@@ -129,47 +144,124 @@ export default function MusicSection() {
                       </p>
                     )}
 
-                    {item.preview_url && item.preview_status === 'ready' && (
+                    {/* United Masters Link */}
+                    {item.source_type === 'united_masters' && item.united_masters_link && (
                       <div className="mb-4">
-                        <MediaPlayer
-                          src={item.preview_url}
-                          title={`${item.title} (Preview)`}
-                          maxDuration={22}
-                        />
+                        <div className="bg-gradient-to-br from-purple-50 to-indigo-50 border-2 border-purple-200 rounded-lg p-4">
+                          <div className="flex items-center gap-3 mb-3">
+                            <Music className="w-6 h-6 text-purple-600" />
+                            <div className="flex-1">
+                              <p className="text-sm font-semibold text-purple-900">Available on United Masters</p>
+                              <p className="text-xs text-purple-700">Full track with cover art</p>
+                            </div>
+                          </div>
+                          <a
+                            href={item.united_masters_link}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="block w-full px-4 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-lg font-semibold text-center transition-all shadow-md hover:shadow-lg"
+                          >
+                            Listen on United Masters →
+                          </a>
+                        </div>
                       </div>
                     )}
 
-                    {item.file_url && !item.preview_url && (
-                      <div className="mb-4">
-                        <MediaPlayer
-                          src={item.file_url}
-                          title={`${item.title} (Preview)`}
-                          maxDuration={22}
-                        />
-                      </div>
-                    )}
+                    {/* Regular preview/file player */}
+                    {item.source_type !== 'united_masters' && (() => {
+                      // Feature flag: Enhanced embed handling
+                      if (!FEATURE_FLAGS.USE_ENHANCED_EMBED_HANDLING) {
+                        // Fallback: Simple rendering without embed detection
+                        const audioSource = item.preview_url || item.file_url;
+                        if (audioSource) {
+                          return (
+                            <div className="mb-4">
+                              <MediaPlayer
+                                src={audioSource}
+                                title={`${item.title} ${(item.embed_full_track ?? false) ? '' : '(Preview)'}`}
+                                maxDuration={(item.embed_full_track ?? false) ? undefined : 22}
+                                artworkUrl={item.artwork_url}
+                              />
+                            </div>
+                          );
+                        }
+                        return null;
+                      }
 
-                    {item.preview_status === 'pending' && (
-                      <div className="mb-4 text-sm text-gray-500 italic">
-                        Preview generating...
-                      </div>
-                    )}
+                      // Enhanced logic with embed detection
+                      // Helper function to check if URL is an actual embed player (not a direct file)
+                      const isEmbedPlayer = (url: string) => {
+                        const lowerUrl = url.toLowerCase();
+                        return (
+                          lowerUrl.includes('soundcloud.com/player') ||
+                          lowerUrl.includes('spotify.com/embed') ||
+                          lowerUrl.includes('youtube.com/embed') ||
+                          lowerUrl.includes('bandcamp.com/EmbeddedPlayer') ||
+                          lowerUrl.includes('audiomack.com/embed')
+                        );
+                      };
 
-                    {item.preview_status === 'failed' && (
-                      <div className="mb-4 text-sm text-red-500 italic">
-                        Preview generation failed. Using limited playback.
-                      </div>
-                    )}
+                      // Determine the source to use: preview_url > file_url
+                      const audioSource = item.preview_url || item.file_url;
+                      
+                      // Show embed player ONLY if embed_url is a real embed player
+                      if (item.embed_url && isEmbedPlayer(item.embed_url)) {
+                        // Ensure autoplay is disabled
+                        let embedUrl = item.embed_url;
+                        
+                        // Remove any existing autoplay parameters first
+                        embedUrl = embedUrl.replace(/[?&]autoplay=1/gi, '');
+                        embedUrl = embedUrl.replace(/[?&]auto_play=true/gi, '');
+                        
+                        const separator = embedUrl.includes('?') ? '&' : '?';
+                        embedUrl = `${embedUrl}${separator}autoplay=0&auto_play=false`;
+                        
+                        return (
+                          <div className="mb-4">
+                            <iframe
+                              src={embedUrl}
+                              className="w-full h-32 rounded-lg"
+                              allow="encrypted-media"
+                              loading="lazy"
+                              sandbox="allow-scripts allow-same-origin allow-presentation"
+                            />
+                          </div>
+                        );
+                      }
 
-                    {item.embed_url && (
-                      <div className="mb-4">
-                        <iframe
-                          src={item.embed_url}
-                          className="w-full h-32 rounded-lg"
-                          allow="autoplay"
-                        />
-                      </div>
-                    )}
+                      // Show preview status
+                      if (item.preview_status === 'pending') {
+                        return (
+                          <div className="mb-4 text-sm text-gray-500 italic">
+                            Preview generating...
+                          </div>
+                        );
+                      }
+
+                      if (item.preview_status === 'failed') {
+                        return (
+                          <div className="mb-4 text-sm text-red-500 italic">
+                            Preview generation failed. Using limited playback.
+                          </div>
+                        );
+                      }
+
+                      // Use MediaPlayer for audio files
+                      if (audioSource) {
+                        return (
+                          <div className="mb-4">
+                            <MediaPlayer
+                              src={audioSource}
+                              title={`${item.title} ${(item.embed_full_track ?? false) ? '' : '(Preview)'}`}
+                              maxDuration={(item.embed_full_track ?? false) ? undefined : 22}
+                              artworkUrl={item.artwork_url}
+                            />
+                          </div>
+                        );
+                      }
+
+                      return null;
+                    })()}
 
                     {/* Metadata Section */}
                     <div className="bg-gray-50 rounded-lg p-3 mb-4 space-y-2 text-sm">
@@ -193,7 +285,7 @@ export default function MusicSection() {
                                 <button
                                   key={slug}
                                   onClick={() => setLegalModalSlug(slug)}
-                                  className="px-2 py-1 text-xs bg-emerald-100 text-emerald-700 rounded hover:bg-emerald-200 transition-colors"
+                                  className="px-2 py-1 text-xs bg-canopy-100 text-forest-700 rounded hover:bg-canopy-200 border border-canopy-300 transition-all"
                                 >
                                   {docTitle}
                                 </button>
@@ -211,7 +303,7 @@ export default function MusicSection() {
                         </span>
                         <button
                           onClick={() => setPurchaseModal(item)}
-                          className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-semibold"
+                          className="px-4 py-2 bg-forest bg-cover text-white rounded-lg border-2 border-forest-800 hover:opacity-90 transition-all font-semibold shadow-lg"
                         >
                           Purchase
                         </button>

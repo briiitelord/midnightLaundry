@@ -15,8 +15,11 @@ interface NavigationProps {
 
 export default function Navigation({ items, activeSection, onSectionChange }: NavigationProps) {
   return (
-    <nav className="bg-white/80 backdrop-blur-sm border-b border-gray-200 shadow-sm sticky top-0 z-40">
-      <div className="max-w-7xl mx-auto px-6">
+    <nav className="relative bg-cover bg-center border-b border-white/20 shadow-sm sticky top-0 z-40" style={{ backgroundImage: 'url(/nebula-bg.jpg)' }}>
+      {/* Dark overlay to make text readable */}
+      <div className="absolute inset-0 bg-black/85 backdrop-blur-sm"></div>
+      
+      <div className="relative max-w-7xl mx-auto px-6">
         <div className="flex space-x-1 overflow-x-auto">
           {items.map((item) => {
             const Icon = item.icon;
@@ -30,8 +33,8 @@ export default function Navigation({ items, activeSection, onSectionChange }: Na
                   transition-all duration-200 whitespace-nowrap border-b-2
                   ${
                     isActive
-                      ? 'text-emerald-700 border-emerald-600 bg-emerald-50/50'
-                      : 'text-gray-600 border-transparent hover:text-gray-900 hover:bg-gray-50'
+                      ? 'text-forest-300 border-forest-500 bg-forest-950/30'
+                      : 'text-gray-300 border-transparent hover:text-white hover:bg-white/10'
                   }
                 `}
               >

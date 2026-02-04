@@ -64,7 +64,7 @@ export default function GiftBucketWidget() {
       {isOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-start sm:items-center justify-center p-4 sm:p-6 overflow-auto">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden max-h-[calc(100vh-4rem)] sm:max-h-[calc(100vh-6rem)]">
-            <div className="bg-gradient-to-r from-amber-500 to-yellow-600 p-6 relative sticky top-0 z-20">
+            <div className="bg-gradient-to-r from-amber-500 to-yellow-600 p-6 sticky top-0 z-20">
               <button
                 onClick={() => setIsOpen(false)}
                 aria-label="Close"

@@ -1,8 +1,11 @@
 import MediaCarousel from '../widgets/MediaCarousel';
+import ChalkboardWidget from '../widgets/ChalkboardWidget';
 
 export default function AboutSection() {
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div className="flex flex-col lg:flex-row gap-8 items-start max-w-7xl mx-auto px-4">
+      {/* Left side - About content */}
+      <div className="space-y-6 flex-1 w-full lg:max-w-2xl">
       <div className="bg-white/50 backdrop-blur-sm rounded-lg border border-gray-200 p-8 shadow-sm">
         <div className="space-y-6 text-gray-800">
           <div>
@@ -42,6 +45,12 @@ export default function AboutSection() {
           <h3 className="font-bold text-blue-900 mb-2">Community</h3>
           <p className="text-sm text-blue-800">Connect in a safe digital creative space</p>
         </div>
+      </div>
+      </div>
+
+      {/* Right side - Chalkboard Widget */}
+      <div className="flex-1 w-full lg:max-w-2xl lg:sticky lg:top-24">
+        <ChalkboardWidget />
       </div>
     </div>
   );

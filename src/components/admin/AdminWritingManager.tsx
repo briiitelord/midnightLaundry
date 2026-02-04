@@ -12,6 +12,7 @@ export default function AdminWritingManager() {
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState<WritingInsert>({
     title: '',
     category: 'poetry',
@@ -37,14 +38,29 @@ export default function AdminWritingManager() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
+    
+    // Prepare data with proper defaults
+    const submitData = {
+      title: formData.title,
+      category: formData.category,
+      content: formData.content || null,
+      file_url: formData.file_url || null,
+      excerpt: formData.excerpt || null,
+      price: formData.price ?? 0,
+      slug: formData.slug || null,
+    };
     
     if (editingId) {
       const { error } = await supabase
         .from('writing_pieces')
-        .update(formData)
+        .update(submitData)
         .eq('id', editingId);
 
-      if (!error) {
+      if (error) {
+        console.error('Update error:', error);
+        setErrorMessage(`Failed to update: ${error.message}`);
+      } else {
         setEditingId(null);
         setFormData({ title: '', category: 'poetry', price: 0 });
         setShowForm(false);
@@ -53,9 +69,12 @@ export default function AdminWritingManager() {
     } else {
       const { error } = await supabase
         .from('writing_pieces')
-        .insert([formData]);
+        .insert([submitData]);
 
-      if (!error) {
+      if (error) {
+        console.error('Insert error:', error);
+        setErrorMessage(`Failed to create: ${error.message}`);
+      } else {
         setFormData({ title: '', category: 'poetry', price: 0 });
         setShowForm(false);
         fetchItems();
@@ -65,13 +84,14 @@ export default function AdminWritingManager() {
 
   const handleEdit = (item: WritingPiece) => {
     setEditingId(item.id);
+    setErrorMessage(null);
     setFormData({
       title: item.title,
       category: item.category,
       content: item.content,
       file_url: item.file_url,
       excerpt: item.excerpt,
-      price: item.price,
+      price: item.price ?? 0,
       slug: item.slug,
     });
     setShowForm(true);
@@ -111,7 +131,8 @@ export default function AdminWritingManager() {
         <button
           onClick={() => {
             setEditingId(null);
-            setFormData({ title: '', category: 'poetry' });
+            setErrorMessage(null);
+            setFormData({ title: '', category: 'poetry', price: 0 });
             setShowForm(true);
           }}
           className="flex items-center gap-2 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 rounded-lg transition"
@@ -138,6 +159,13 @@ export default function AdminWritingManager() {
             <h3 className="text-xl font-bold mb-4">
               {editingId ? 'Edit Writing' : 'Add New Writing'}
             </h3>
+            
+            {errorMessage && (
+              <div className="mb-4 p-3 bg-red-600/20 border border-red-600 rounded-lg text-red-400">
+                {errorMessage}
+              </div>
+            )}
+            
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-1">Title</label>
@@ -242,6 +270,7 @@ export default function AdminWritingManager() {
                 <h3 className="font-semibold truncate">{item.title}</h3>
                 <p className="text-sm text-gray-400 truncate">
                   {item.category.replace(/_/g, ' ')}
+                  {item.price > 0 && ` • $${item.price.toFixed(2)}`}
                   {item.excerpt && ` • ${item.excerpt.substring(0, 50)}...`}
                 </p>
               </div>

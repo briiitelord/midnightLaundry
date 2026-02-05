@@ -42,31 +42,11 @@ Before setting the `VITE_ENCRYPTED_ADMIN_PASSWORD` secret, you need to encrypt y
 # 1. Create a temporary .env file with your secret key
 echo "VITE_ADMIN_SECRET_KEY=your_strong_secret_key_min_32_chars" > .env
 
-# 2. Create a test file to encrypt your password
-cat > encrypt-password.mjs << 'EOF'
-import crypto from 'crypto';
+# 2. Use the encryption utility script
+node scripts/encrypt-admin-password.mjs
 
-const SECRET_KEY = process.env.VITE_ADMIN_SECRET_KEY || 'your_secret_key';
-const password = 'YourDesiredAdminPassword'; // Change this
-
-function encryptPassword(password) {
-  const iv = crypto.randomBytes(16);
-  const key = crypto.createHash('sha256').update(SECRET_KEY).digest();
-  const cipher = crypto.createCipheriv('aes-256-cbc', key, iv);
-  let encrypted = cipher.update(password, 'utf8', 'hex');
-  encrypted += cipher.final('hex');
-  return iv.toString('hex') + ':' + encrypted;
-}
-
-console.log('Encrypted password:', encryptPassword(password));
-EOF
-
-# 3. Run the script
-node encrypt-password.mjs
-
-# 4. Copy the output and use it as VITE_ENCRYPTED_ADMIN_PASSWORD secret
-# 5. Delete the temporary files
-rm encrypt-password.mjs .env
+# 3. Follow the prompts to generate your encrypted password
+# 4. Copy the output and add both secrets to GitHub
 ```
 
 **Option B: Using browser console (less secure)**

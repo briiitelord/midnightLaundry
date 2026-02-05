@@ -71,17 +71,21 @@ The application uses Supabase with the following tables:
 
 ## Setup Instructions
 
+### Local Development
+
 1. Install dependencies:
    ```bash
    npm install
    ```
 
-2. Configure Supabase:
-   - Create a `.env` file in the root directory with your Supabase credentials:
-     ```
-     VITE_SUPABASE_URL=your_supabase_project_url
-     VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
-     ```
+2. Configure environment variables:
+   ```bash
+   # Copy the example environment file
+   cp .env.example .env
+   
+   # Edit .env with your credentials
+   # See .env.example for all required variables
+   ```
 
 3. Run development server:
    ```bash
@@ -92,6 +96,18 @@ The application uses Supabase with the following tables:
    ```bash
    npm run build
    ```
+
+### Deployment to GitHub Pages
+
+For secure deployment with environment variables and credentials:
+
+📖 **See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for complete deployment instructions**
+
+Key points:
+- Use GitHub Secrets for all sensitive credentials
+- Never commit `.env` files to the repository
+- Automated deployment via GitHub Actions
+- Encrypted admin password system
 
 ## Future Enhancements
 

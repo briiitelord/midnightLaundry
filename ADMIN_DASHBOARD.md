@@ -17,12 +17,13 @@ The Admin Dashboard is a secure content management interface for briiite to mana
 
 ### Password Management
 
-⚠️ **Important**: Change the default password immediately in production!
+⚠️ **Important**: Configure a secure admin password before deploying to production!
 
-**To change the password:**
-1. Edit `src/App.tsx`
-2. Find the line: `const ADMIN_PASSWORD = 'briiite2025';`
-3. Replace with your secure password
+**To configure the password:**
+1. Set `VITE_ADMIN_SECRET_KEY` in your `.env` file with a strong secret key
+2. Use the encryption utility to generate an encrypted password:
+   - In browser console or Node.js: `encryptPassword('your-secure-password')`
+3. Set `VITE_ENCRYPTED_ADMIN_PASSWORD` in your `.env` file with the output
 4. Rebuild and redeploy
 
 ## Dashboard Sections
@@ -323,4 +324,4 @@ For issues or feature requests:
 
 **Last Updated**: January 31, 2026
 **Version**: 1.0
-**Admin Password**: briiite2025 (⚠️ Change before production deployment)
+**Admin Password**: Configured via environment variables (see Setup section)

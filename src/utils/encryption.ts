@@ -1,7 +1,8 @@
 // Simple encryption/decryption utility using TextEncoder and a secret key
 // This provides obfuscation in the source code; for production, use proper cryptography
 
-const SECRET_KEY = 'briiite_midnight_laundry_2025'; // Change this to a strong secret
+// IMPORTANT: Set VITE_ADMIN_SECRET_KEY in your .env file before deploying
+const SECRET_KEY = import.meta.env.VITE_ADMIN_SECRET_KEY || 'default_key_change_me';
 
 function encryptPassword(password: string): string {
   let encrypted = '';

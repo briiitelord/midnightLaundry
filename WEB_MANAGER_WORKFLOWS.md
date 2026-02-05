@@ -495,14 +495,18 @@ Monthly:
 
 ⚠️ **Follow these steps AFTER initial setup:**
 
-1. Open your code editor
-2. Find `src/App.tsx`
-3. Locate line: `const ADMIN_PASSWORD = 'briiite2025';`
-4. Change to: `const ADMIN_PASSWORD = 'your-new-secure-password';`
-5. Save file
-6. Rebuild: `npm run build`
-7. Deploy to production
-8. You'll now use new password to login
+1. Create a `.env` file in project root
+2. Add required environment variables:
+   ```
+   VITE_SUPABASE_URL=your_supabase_url
+   VITE_SUPABASE_ANON_KEY=your_supabase_key
+   VITE_ADMIN_SECRET_KEY=your_secret_key
+   VITE_ENCRYPTED_ADMIN_PASSWORD=your_encrypted_password
+   ```
+3. Use the encryption utility from `src/utils/encryption.ts` to generate encrypted password
+4. Rebuild the application: `npm run build`
+5. Deploy to production
+6. You'll now use your new password to login
 
 ### Password Requirements
 

@@ -2,6 +2,8 @@
 
 A comprehensive multimedia artist portfolio platform for briiite, featuring music, videos, writing, research, and social media integration.
 
+> **⚠️ Security Notice**: Before deploying or making this repository public, please read [SECURITY.md](SECURITY.md) for important configuration steps.
+
 ## Features
 
 ### Music Section
@@ -75,9 +77,9 @@ The application uses Supabase with the following tables:
    ```
 
 2. Configure Supabase:
-   - Update `.env` with your Supabase credentials:
+   - Create a `.env` file in the root directory with your Supabase credentials:
      ```
-     VITE_SUPABASE_URL=https://knpgxbafbxwrzsgetlnm.supabase.co
+     VITE_SUPABASE_URL=your_supabase_project_url
      VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
      ```
 

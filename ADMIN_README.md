@@ -8,13 +8,13 @@
 
 ### Access the Dashboard
 1. Click the **Settings** icon (⚙️) in the top-right corner
-2. Enter password: `briiite2025`
+2. Enter your configured admin password (see Setup section)
 3. Start managing content!
 
-### Change Your Password
-1. Edit `src/App.tsx`
-2. Find: `const ADMIN_PASSWORD = 'briiite2025';`
-3. Change to your secure password
+### Configure Your Password
+1. Set `VITE_ADMIN_SECRET_KEY` in your `.env` file with a strong secret key
+2. Generate encrypted password using the encryption utility
+3. Set `VITE_ENCRYPTED_ADMIN_PASSWORD` in your `.env` file with the output
 4. Rebuild: `npm run build`
 
 ---
@@ -286,7 +286,7 @@ Edit `src/pages/AdminDashboard.tsx`:
 4. Add to navigation
 
 ### Modify Password
-`src/App.tsx` - line with `ADMIN_PASSWORD`
+See "Configure Your Password" section above - use environment variables for security
 
 ---
 

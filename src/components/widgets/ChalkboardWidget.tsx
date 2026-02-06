@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { ChevronRight, ChevronLeft, Eraser, Eye, EyeOff, Download, Check } from 'lucide-react';
+import { ChevronRight, ChevronLeft, Eraser, Eye, EyeOff, Download, Check, MousePointer2 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 type Scribble = {
@@ -19,6 +19,8 @@ export default function ChalkboardWidget() {
   const [chalkColor, setChalkColor] = useState('#ffffff');
   const [isSaving, setIsSaving] = useState(false);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [isGlideMode, setIsGlideMode] = useState(false);
+  const [userName, setUserName] = useState('');
 
   useEffect(() => {
     fetchActiveScribble();
@@ -81,7 +83,8 @@ export default function ChalkboardWidget() {
   };
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDrawing && e.type !== 'mousedown') return;
+    // In glide mode, draw on any movement. In normal mode, only draw when mouse is pressed
+    if (!isGlideMode && !isDrawing && e.type !== 'mousedown') return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -90,8 +93,10 @@ export default function ChalkboardWidget() {
     if (!ctx) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
 
     ctx.lineWidth = 4;
     ctx.lineCap = 'round';
@@ -140,9 +145,10 @@ export default function ChalkboardWidget() {
         }, 'image/png');
       });
 
-      // Generate filename
+      // Generate filename with user name if provided
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      const filename = `user-scribble-${timestamp}.png`;
+      const namePrefix = userName.trim() ? userName.trim().replace(/[^a-zA-Z0-9]/g, '-') : 'anonymous';
+      const filename = `scribble-by-${namePrefix}-${timestamp}.png`;
 
       // Upload to Supabase storage
       const { error: uploadError } = await supabase.storage
@@ -165,11 +171,15 @@ export default function ChalkboardWidget() {
         .getPublicUrl(filename);
 
       // Save to database
+      const scribbleTitle = userName.trim() 
+        ? `Scribbled by ${userName.trim()} - ${new Date().toLocaleDateString()}`
+        : `User Scribble - ${new Date().toLocaleDateString()}`;
+      
       const { error: dbError } = await supabase
         .from('scribbles')
         .insert([{
-          title: `User Scribble - ${new Date().toLocaleDateString()}`,
-          description: 'Created by user via chalkboard widget',
+          title: scribbleTitle,
+          description: `Created by ${userName.trim() || 'anonymous user'} via chalkboard widget`,
           pdf_url: urlData.publicUrl,
           is_active: false,
           display_date: new Date().toISOString().split('T')[0],
@@ -241,8 +251,23 @@ export default function ChalkboardWidget() {
                   }}
                 />
 
+                {/* Name Input */}
+                <div className="mt-4">
+                  <label className="block text-sm font-semibold text-forest-900 mb-2">
+                    Scribbled by:
+                  </label>
+                  <input
+                    type="text"
+                    value={userName}
+                    onChange={(e) => setUserName(e.target.value)}
+                    placeholder="Your name (optional)"
+                    maxLength={50}
+                    className="w-full px-3 py-2 border-2 border-forest-700 rounded-lg focus:outline-none focus:border-forest-900 bg-white/90"
+                  />
+                </div>
+
                 {/* Chalk Color Palette */}
-                <div className="flex gap-2 mt-4 items-center">
+                <div className="flex gap-2 mt-4 items-center flex-wrap">
                   <span className="text-sm text-forest-900 font-semibold">Chalk:</span>
                   {['#ffffff', '#ffeb3b', '#ff5722', '#2196f3', '#4caf50', '#ff4081'].map((color) => (
                     <button
@@ -257,6 +282,21 @@ export default function ChalkboardWidget() {
                       title={`Select ${color} chalk`}
                     />
                   ))}
+                  
+                  {/* Glide Mode Toggle */}
+                  <button
+                    onClick={() => setIsGlideMode(!isGlideMode)}
+                    className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
+                      isGlideMode
+                        ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                        : 'bg-gray-600 hover:bg-gray-700 text-white'
+                    }`}
+                    title={isGlideMode ? 'Glide mode ON - Draw on any movement (mobile-friendly)' : 'Glide mode OFF - Press to draw'}
+                  >
+                    <MousePointer2 className="w-4 h-4" />
+                    {isGlideMode ? 'Glide: ON' : 'Glide: OFF'}
+                  </button>
+                  
                   <button
                     onClick={clearCanvas}
                     className="bg-forest-800 hover:bg-forest-900 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"

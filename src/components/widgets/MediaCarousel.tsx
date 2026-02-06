@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Play, Pause, SkipForward, Volume2, VolumeX } from 'lucide-react';
+import { Play, Pause, SkipForward, Volume2, VolumeX, ExternalLink } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Database } from '../../types/database.types';
 
@@ -19,7 +19,7 @@ export default function MediaCarousel() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const PREVIEW_DURATION = 11; // seconds
+  const PREVIEW_DURATION = 33; // seconds
 
   useEffect(() => {
     fetchMediaItems();
@@ -53,7 +53,18 @@ export default function MediaCarousel() {
 
       // Shuffle and combine
       const combined = [...music, ...videos].sort(() => Math.random() - 0.5);
+      
+      // Find mediaPrima index (66. track)
+      const mediaPrimaIndex = combined.findIndex(item => 
+        item.type === 'audio' && item.item.title === '66.'
+      );
+      
       setMediaItems(combined);
+      
+      // Set initial index to mediaPrima if found, otherwise 0
+      if (mediaPrimaIndex !== -1) {
+        setCurrentIndex(mediaPrimaIndex);
+      }
     } catch (error) {
       console.error('Error fetching media items:', error);
     }
@@ -280,6 +291,21 @@ export default function MediaCarousel() {
               <Volume2 className="w-5 h-5 text-slate-600" />
             )}
           </button>
+
+          {/* United Masters Link for New Release tracks */}
+          {currentItem?.type === 'audio' && 
+           currentItem.item.category === 'new_release' && 
+           currentItem.item.united_masters_link && (
+            <a
+              href={currentItem.item.united_masters_link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-colors"
+              title="Listen on United Masters"
+            >
+              <ExternalLink className="w-5 h-5" />
+            </a>
+          )}
 
           <div className="text-sm text-canopy-700">
             {currentIndex + 1} / {mediaItems.length}

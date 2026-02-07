@@ -25,6 +25,8 @@ export default function AdminMusicManager() {
     source_type: 'direct_upload',
     embed_full_track: false,
     artwork_url: null,
+    license_single_use_price: null,
+    license_master_file_price: null,
   });
 
   useEffect(() => {
@@ -336,6 +338,56 @@ export default function AdminMusicManager() {
                   />
                 </div>
               </div>
+
+              {/* Beat Licensing Options - Only for Beat for Sale */}
+              {formData.category === 'beat_for_sale' && (
+                <div className="bg-amber-900/20 border border-amber-700 rounded-lg p-4 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
+                    <h4 className="font-semibold text-amber-300">Beat Licensing Options</h4>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                        Single Use License Price
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={formData.license_single_use_price || ''}
+                        onChange={(e) => setFormData({ ...formData, license_single_use_price: parseFloat(e.target.value) || null })}
+                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-amber-500"
+                        placeholder="e.g., 25.00"
+                      />
+                      <p className="text-xs text-gray-400 mt-1">
+                        Can upload to DSP, no additional commercial use
+                      </p>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-1">
+                        Master File License Price
+                      </label>
+                      <input
+                        type="number"
+                        step="0.01"
+                        value={formData.license_master_file_price || ''}
+                        onChange={(e) => setFormData({ ...formData, license_master_file_price: parseFloat(e.target.value) || null })}
+                        className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-amber-500"
+                        placeholder="e.g., 100.00"
+                      />
+                      <p className="text-xs text-gray-400 mt-1">
+                        Full creative & commercial use + 3 free commissions
+                      </p>
+                    </div>
+                  </div>
+                  
+                  <p className="text-xs text-amber-300">
+                    💡 Tip: Master file purchasers receive an 8-digit code for 3 free commission requests
+                  </p>
+                </div>
+              )}
 
               {/* United Masters Section - Only for New Release */}
               {formData.category === 'new_release' && (

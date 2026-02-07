@@ -25,6 +25,8 @@ type MusicFile = {
   created_at: string;
   source_type: 'direct_upload' | 'united_masters' | null;
   united_masters_link: string | null;
+  license_single_use_price: number | null;
+  license_master_file_price: number | null;
 };
 type MusicCategory = 'new_release' | 'mix' | 'beat_for_sale' | 'podcast_clip' | 'exclusive_release';
 

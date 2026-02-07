@@ -30,6 +30,8 @@ export interface Database {
           slug: string | null
           source_type: 'direct_upload' | 'united_masters'
           united_masters_link: string | null
+          license_single_use_price: number | null
+          license_master_file_price: number | null
           deleted_at: string | null
           created_at: string
           updated_at: string
@@ -52,6 +54,8 @@ export interface Database {
           slug?: string | null
           source_type?: 'direct_upload' | 'united_masters'
           united_masters_link?: string | null
+          license_single_use_price?: number | null
+          license_master_file_price?: number | null
           deleted_at?: string | null
           created_at?: string
           updated_at?: string
@@ -74,6 +78,8 @@ export interface Database {
           slug?: string | null
           source_type?: 'direct_upload' | 'united_masters'
           united_masters_link?: string | null
+          license_single_use_price?: number | null
+          license_master_file_price?: number | null
           deleted_at?: string | null
           created_at?: string
           updated_at?: string

@@ -3,7 +3,7 @@ import CommissionForm from '../forms/CommissionForm';
 
 export default function CommissionSection() {
   return (
-    <div className="space-y-8">
+    <div id="commission-section" className="space-y-8">
       <div className="bg-white/50 backdrop-blur-sm rounded-lg border border-gray-200 p-8 shadow-sm">
         <div className="flex items-center gap-3 mb-6">
           <Briefcase className="w-8 h-8 text-emerald-600" />

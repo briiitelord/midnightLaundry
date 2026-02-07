@@ -26,6 +26,23 @@ export default function ChalkboardWidget() {
     fetchActiveScribble();
   }, []);
 
+  // Lock scroll when glide mode is active
+  useEffect(() => {
+    if (isGlideMode) {
+      document.body.style.overflow = 'hidden';
+      document.body.style.touchAction = 'none';
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    }
+
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.touchAction = '';
+    };
+  }, [isGlideMode]);
+
   const fetchActiveScribble = async () => {
     try {
       const { data, error } = await supabase

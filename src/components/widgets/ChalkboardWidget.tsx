@@ -72,6 +72,12 @@ export default function ChalkboardWidget() {
     draw(e);
   };
 
+  const startDrawingTouch = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
+    setIsDrawing(true);
+    drawTouch(e);
+  };
+
   const stopDrawing = () => {
     setIsDrawing(false);
     const canvas = canvasRef.current;
@@ -97,6 +103,42 @@ export default function ChalkboardWidget() {
     const scaleY = canvas.height / rect.height;
     const x = (e.clientX - rect.left) * scaleX;
     const y = (e.clientY - rect.top) * scaleY;
+
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.strokeStyle = chalkColor;
+    ctx.globalAlpha = 0.6;
+
+    // Add chalk texture effect
+    const spread = 2;
+    for (let i = 0; i < 3; i++) {
+      const offsetX = (Math.random() - 0.5) * spread;
+      const offsetY = (Math.random() - 0.5) * spread;
+      ctx.lineTo(x + offsetX, y + offsetY);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x + offsetX, y + offsetY);
+    }
+  };
+
+  const drawTouch = (e: React.TouchEvent<HTMLCanvasElement>) => {
+    // In glide mode, draw on any movement. In normal mode, only draw when touch is active
+    if (!isGlideMode && !isDrawing && e.type !== 'touchstart') return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const touch = e.touches[0];
+    if (!touch) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const x = (touch.clientX - rect.left) * scaleX;
+    const y = (touch.clientY - rect.top) * scaleY;
 
     ctx.lineWidth = 4;
     ctx.lineCap = 'round';
@@ -244,6 +286,9 @@ export default function ChalkboardWidget() {
                   onMouseUp={stopDrawing}
                   onMouseMove={draw}
                   onMouseLeave={stopDrawing}
+                  onTouchStart={startDrawingTouch}
+                  onTouchEnd={stopDrawing}
+                  onTouchMove={drawTouch}
                   className="w-full h-[400px] rounded-lg shadow-inner cursor-crosshair border-8 border-[#8B7355]"
                   style={{ 
                     backgroundColor: '#1a2e1a',

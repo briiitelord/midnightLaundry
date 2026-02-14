@@ -39,7 +39,8 @@ export async function uploadFile(
  * Stores in bucket: 'music_files' under category folder
  */
 export async function uploadMusicFile(file: File, category: string): Promise<string | null> {
-  const fileName = `${Date.now()}-${file.name}`;
+  const sanitizedName = sanitizeFilename(file.name);
+  const fileName = `${Date.now()}-${sanitizedName}`;
   const path = `${category}/${fileName}`;
   return uploadFile('music_files', path, file);
 }
@@ -51,9 +52,24 @@ export async function uploadVideoFile(
   file: File,
   contentRating: 'sfw' | 'nsfw'
 ): Promise<string | null> {
-  const fileName = `${Date.now()}-${file.name}`;
+  const sanitizedName = sanitizeFilename(file.name);
+  const fileName = `${Date.now()}-${sanitizedName}`;
   const path = `${contentRating}/${fileName}`;
   return uploadFile('videos', path, file);
+}
+
+/**
+ * Sanitize filename by removing or replacing invalid characters
+ * Supabase Storage doesn't allow certain special characters
+ */
+function sanitizeFilename(filename: string): string {
+  // Replace problematic characters with underscores
+  // Keep alphanumeric, dots, hyphens, and underscores only
+  return filename
+    .replace(/[^\w\s.-]/g, '_') // Replace special chars with underscore
+    .replace(/\s+/g, '_')        // Replace spaces with underscore
+    .replace(/_+/g, '_')         // Replace multiple underscores with single
+    .replace(/^[._]+|[._]+$/g, ''); // Remove leading/trailing dots or underscores
 }
 
 /**
@@ -65,7 +81,8 @@ export async function uploadToStorage(
   bucket: string,
   folder: string = ''
 ): Promise<string | null> {
-  const fileName = `${Date.now()}-${file.name}`;
+  const sanitizedName = sanitizeFilename(file.name);
+  const fileName = `${Date.now()}-${sanitizedName}`;
   const path = folder ? `${folder}/${fileName}` : fileName;
   return uploadFile(bucket, path, file);
 }

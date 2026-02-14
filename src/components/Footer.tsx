@@ -1,12 +1,14 @@
 import { useState } from 'react';
+import { useSiteSettings } from '../hooks/useSiteSettings';
 import LegalDocumentView from './LegalDocumentView';
 
 export default function Footer() {
+  const { settings } = useSiteSettings();
   const [legalModalSlug, setLegalModalSlug] = useState<string | null>(null);
 
   return (
     <>
-      <footer className="relative bg-cover bg-center border-t border-white/10 mt-16" style={{ backgroundImage: 'url(/nebula-bg.jpg)' }}>
+      <footer className="relative bg-cover bg-center border-t border-white/10 mt-16" style={{ backgroundImage: `url(${settings.footer_image})` }}>
         {/* Dark overlay to make text readable */}
         <div className="absolute inset-0 bg-black/85"></div>
         

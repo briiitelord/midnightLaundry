@@ -11,6 +11,7 @@ import BriiiteBeSpittinPage from './BriiiteBeSpittinPage';
 import TalkToBriiiteWidget from '../components/widgets/TalkToBriiiteWidget';
 import GiftBucketWidget from '../components/widgets/GiftBucketWidget';
 import Footer from '../components/Footer';
+import { useSiteSettings } from '../hooks/useSiteSettings';
 import type { Section } from '../App';
 
 interface HomePageProps {
@@ -19,6 +20,8 @@ interface HomePageProps {
 }
 
 export default function HomePage({ activeSection, onSectionChange }: HomePageProps) {
+  const { settings } = useSiteSettings();
+  
   const navItems = [
     { id: 'about' as Section, label: 'About', icon: Info },
     { id: 'music' as Section, label: 'Music', icon: Music },
@@ -55,11 +58,11 @@ export default function HomePage({ activeSection, onSectionChange }: HomePagePro
 
   return (
     <div className="min-h-screen relative overflow-hidden bg-gray-50">
-      {/* Main laundry sketch background */}
+      {/* Main laundry sketch background - dynamically loaded from site settings */}
       <div
         className="absolute inset-0 pointer-events-none"
         style={{
-          backgroundImage: 'url(/laundry-sketch.JPG)',
+          backgroundImage: `url(${settings.background_image})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Filename Sanitization Test</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background: #1a1a1a;
+      color: #0f0;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: #000;
+      border: 1px solid #0f0;
+      padding: 20px;
+      border-radius: 5px;
+    }
+    h1 {
+      color: #0ff;
+    }
+    .test-case {
+      background: #003300;
+      padding: 10px;
+      margin: 10px 0;
+      border-left: 3px solid #0f0;
+    }
+    .original { color: #ff0; }
+    .sanitized { color: #0f0; }
+    .success { color: #0f0; }
+    .error { color: #f00; }
+    button {
+      background: #0f0;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 10px 5px 10px 0;
+    }
+    button:hover {
+      background: #0ff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📁 Filename Sanitization Test</h1>
+    
+    <button onclick="runTests()">Run Tests</button>
+    
+    <div id="results"></div>
+  </div>
+
+  <script>
+    function sanitizeFilename(filename) {
+      // Replace problematic characters with underscores
+      // Keep alphanumeric, dots, hyphens, and underscores only
+      return filename
+        .replace(/[^\w\s.-]/g, '_') // Replace special chars with underscore
+        .replace(/\s+/g, '_')        // Replace spaces with underscore
+        .replace(/_+/g, '_')         // Replace multiple underscores with single
+        .replace(/^[._]+|[._]+$/g, ''); // Remove leading/trailing dots or underscores
+    }
+
+    function runTests() {
+      const testCases = [
+        // The problematic case from the error
+        { input: '1771073812919-…theEnormity_scribble2.pdf', description: 'Filename with ellipsis character' },
+        
+        // Other edge cases
+        { input: 'file with spaces.pdf', description: 'Spaces in filename' },
+        { input: 'file@#$%^&*()name.pdf', description: 'Special characters' },
+        { input: '你好世界.pdf', description: 'Unicode characters' },
+        { input: 'file\\name/with\\slashes.pdf', description: 'Slashes in filename' },
+        { input: 'file:name|with<pipes>.pdf', description: 'Pipes and brackets' },
+        { input: '___leading_underscores.pdf', description: 'Leading underscores' },
+        { input: 'trailing_underscores___.pdf', description: 'Trailing underscores' },
+        { input: 'multiple   spaces   between.pdf', description: 'Multiple spaces' },
+        { input: 'normal-file_name.123.pdf', description: 'Normal filename (should stay the same)' },
+        { input: '..hidden.file..pdf', description: 'Leading dots' },
+      ];
+
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<h2>Test Results</h2>';
+
+      let passCount = 0;
+      let failCount = 0;
+
+      testCases.forEach((testCase, index) => {
+        const sanitized = sanitizeFilename(testCase.input);
+        
+        // Check if sanitized version is valid (no problematic chars)
+        const hasProblematicChars = /[^\w.-]/.test(sanitized);
+        const passed = !hasProblematicChars && sanitized.length > 0;
+        
+        if (passed) passCount++;
+        else failCount++;
+
+        resultsDiv.innerHTML += `
+          <div class="test-case">
+            <strong>Test ${index + 1}:</strong> ${testCase.description}<br>
+            <span class="original">Original:</span> "${testCase.input}"<br>
+            <span class="sanitized">Sanitized:</span> "${sanitized}"<br>
+            <strong>Result:</strong> <span class="${passed ? 'success' : 'error'}">${passed ? '✅ PASS' : '❌ FAIL'}</span>
+          </div>
+        `;
+      });
+
+      resultsDiv.innerHTML += `
+        <div class="test-case" style="border-color: ${failCount === 0 ? '#0f0' : '#f00'};">
+          <h3>Summary</h3>
+          <strong>Total Tests:</strong> ${testCases.length}<br>
+          <strong class="success">Passed:</strong> ${passCount}<br>
+          <strong class="error">Failed:</strong> ${failCount}<br>
+          <strong>Status:</strong> ${failCount === 0 ? '<span class="success">✅ ALL TESTS PASSED!</span>' : '<span class="error">❌ SOME TESTS FAILED</span>'}
+        </div>
+      `;
+    }
+
+    // Auto-run on load
+    runTests();
+  </script>
+</body>
+</html>

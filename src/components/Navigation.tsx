@@ -1,4 +1,5 @@
 import { LucideIcon } from 'lucide-react';
+import { useSiteSettings } from '../hooks/useSiteSettings';
 import type { Section } from '../App';
 
 interface NavItem {
@@ -14,8 +15,10 @@ interface NavigationProps {
 }
 
 export default function Navigation({ items, activeSection, onSectionChange }: NavigationProps) {
+  const { settings } = useSiteSettings();
+  
   return (
-    <nav className="relative bg-cover bg-center border-b border-white/20 shadow-sm sticky top-0 z-40" style={{ backgroundImage: 'url(/nebula-bg.jpg)' }}>
+    <nav className="bg-cover bg-center border-b border-white/20 shadow-sm sticky top-0 z-40" style={{ backgroundImage: `url(${settings.header_image})` }}>
       {/* Dark overlay to make text readable */}
       <div className="absolute inset-0 bg-black/85 backdrop-blur-sm"></div>
       

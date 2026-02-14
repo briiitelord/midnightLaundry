@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Site Settings Debug</title>
+  <style>
+    body {
+      font-family: 'Courier New', monospace;
+      background: #1a1a1a;
+      color: #0f0;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: #000;
+      border: 1px solid #0f0;
+      padding: 20px;
+      border-radius: 5px;
+    }
+    h1 { color: #0ff; }
+    .status { 
+      padding: 10px;
+      margin: 10px 0;
+      border-left: 3px solid #0f0;
+      background: #003300;
+    }
+    .error { border-color: #f00; background: #330000; color: #f00; }
+    .success { border-color: #0f0; background: #003300; color: #0f0; }
+    button {
+      background: #0f0;
+      color: #000;
+      border: none;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-weight: bold;
+      margin: 10px 5px 10px 0;
+    }
+    button:hover { background: #0ff; }
+    pre { 
+      background: #222;
+      padding: 10px;
+      overflow-x: auto;
+      border: 1px solid #444;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔍 Site Settings Debug Tool</h1>
+    
+    <button onclick="testDatabaseConnection()">Test Database Connection</button>
+    <button onclick="testHookFetch()">Test useSiteSettings Hook</button>
+    <button onclick="checkCurrentImages()">Check Current Images</button>
+    
+    <div id="results"></div>
+  </div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
+
+    const SUPABASE_URL = 'https://knpgxbafbxwrzsgetlnm.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtucGd4YmFmYnh3cnpzZ2V0bG5tIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk1MjA4NjEsImV4cCI6MjA4NTA5Njg2MX0.voC9-LsTRNs-gqTb5hyZLlOqjeyJXTJRWmkQRz15ufs';
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    window.testDatabaseConnection = async function() {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<div class="status"><h3>Testing Database Connection...</h3></div>';
+
+      try {
+        const { data, error } = await supabase
+          .from('site_settings')
+          .select('*')
+          .in('setting_key', [
+            'background_image',
+            'button_theme_image',
+            'header_image',
+            'footer_image'
+          ]);
+
+        if (error) throw error;
+
+        resultsDiv.innerHTML += `
+          <div class="status success">
+            <h3>✅ Database Connection: SUCCESS</h3>
+            <p>Found ${data.length} settings in database</p>
+            <pre>${JSON.stringify(data, null, 2)}</pre>
+          </div>
+        `;
+
+        // Check if these are default values or uploaded ones
+        const hasUploads = data.some(s => 
+          s.setting_value && 
+          s.setting_value.includes('supabase.co') &&
+          s.setting_value.includes('site-images')
+        );
+
+        if (hasUploads) {
+          resultsDiv.innerHTML += `
+            <div class="status success">
+              <p>✅ <strong>Uploaded images detected!</strong></p>
+              <p>The database has URLs pointing to Supabase Storage.</p>
+            </div>
+          `;
+        } else {
+          resultsDiv.innerHTML += `
+            <div class="status error">
+              <p>⚠️ <strong>Still using default images</strong></p>
+              <p>Database has hardcoded paths like "/laundry-sketch.JPG"</p>
+              <p>These are NOT uploaded images from Supabase Storage.</p>
+              <p><strong>Action needed:</strong> Upload new images via Admin Dashboard → Site Build</p>
+            </div>
+          `;
+        }
+
+      } catch (error) {
+        resultsDiv.innerHTML += `
+          <div class="status error">
+            <h3>❌ Database Connection: FAILED</h3>
+            <p>Error: ${error.message}</p>
+          </div>
+        `;
+      }
+    };
+
+    window.testHookFetch = async function() {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<div class="status"><h3>Simulating useSiteSettings Hook...</h3></div>';
+
+      const DEFAULT_SETTINGS = {
+        background_image: '/laundry-sketch.JPG',
+        button_theme_image: '/forest-texture.jpg',
+        header_image: '/nebula-bg.jpg',
+        footer_image: '/nebula-bg.jpg',
+      };
+
+      try {
+        const { data, error } = await supabase
+          .from('site_settings')
+          .select('setting_key, setting_value')
+          .in('setting_key', Object.keys(DEFAULT_SETTINGS));
+
+        if (error) throw error;
+
+        const fetchedSettings = {};
+        data.forEach((setting) => {
+          fetchedSettings[setting.setting_key] = setting.setting_value;
+        });
+
+        const finalSettings = {
+          ...DEFAULT_SETTINGS,
+          ...fetchedSettings,
+        };
+
+        resultsDiv.innerHTML += `
+          <div class="status success">
+            <h3>✅ Hook Simulation: SUCCESS</h3>
+            <h4>Settings that would be returned:</h4>
+            <pre>${JSON.stringify(finalSettings, null, 2)}</pre>
+          </div>
+        `;
+
+      } catch (error) {
+        resultsDiv.innerHTML += `
+          <div class="status error">
+            <h3>❌ Hook Simulation: FAILED</h3>
+            <p>Error: ${error.message}</p>
+          </div>
+        `;
+      }
+    };
+
+    window.checkCurrentImages = function() {
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = '<div class="status"><h3>Checking Current Site Images...</h3></div>';
+
+      const images = {
+        'Background': document.querySelector('[style*="laundry-sketch"]') || 'Not found',
+        'Header': document.querySelector('nav[style*="background"]') || 'Not found',
+        'Footer': document.querySelector('footer[style*="background"]') || 'Not found'
+      };
+
+      let html = '<div class="status"><h3>Current Images on This Page:</h3>';
+      for (const [name, elem] of Object.entries(images)) {
+        if (elem === 'Not found') {
+          html += `<p>❌ ${name}: Not found on this page</p>`;
+        } else {
+          const style = elem.getAttribute('style');
+          const bgMatch = style.match(/background-image:\s*url\(['"]?([^'"]+)['"]?\)/);
+          html += `<p>✅ ${name}: ${bgMatch ? bgMatch[1] : 'No background-image'}</p>`;
+        }
+      }
+      html += '</div>';
+
+      resultsDiv.innerHTML += html;
+      resultsDiv.innerHTML += `
+        <div class="status">
+          <h4>⚠️ Important Note:</h4>
+          <p>This debug page doesn't have the actual site components.</p>
+          <p>To see real results, check the production site at:</p>
+          <p><strong>https://midnightlaundry247.com</strong></p>
+        </div>
+      `;
+    };
+
+    // Auto-run on load
+    window.testDatabaseConnection();
+  </script>
+</body>
+</html>
